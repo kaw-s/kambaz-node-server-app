@@ -1,41 +1,31 @@
-import { v4 as uuidv4 } from "uuid";
+import AssignmentModel from "./model.js";
 
-export default function AssignmentsDao(db) {
-  const findAllAssignments = () => {
-    return db.assignments;
+export default function AssignmentsDao() {
+  const findAllAssignments = async () => {
+    return await AssignmentModel.find();
   };
 
-  const findAssignmentsForCourse = (courseId) => {
-    return db.assignments.filter(
-      (assignment) => assignment.course === courseId
+  const findAssignmentsForCourse = async (courseId) => {
+    return await AssignmentModel.find({ course: courseId });
+  };
+
+  const createAssignment = async (assignment) => {
+    const newAssignment = new AssignmentModel(assignment);
+    return await newAssignment.save();
+  };
+
+  const deleteAssignment = async (assignmentId) => {
+    const result = await AssignmentModel.deleteOne({ _id: assignmentId });
+    return { success: result.deletedCount > 0 };
+  };
+
+  const updateAssignment = async (assignmentId, updates) => {
+    const result = await AssignmentModel.findByIdAndUpdate(
+      assignmentId,
+      updates,
+      { new: true }
     );
-  };
-
-  const createAssignment = (assignment) => {
-    const newAssignment = {
-      ...assignment,
-      _id: uuidv4(),
-    };
-    db.assignments.push(newAssignment);
-    return newAssignment;
-  };
-
-  const deleteAssignment = (assignmentId) => {
-    const index = db.assignments.findIndex((a) => a._id === assignmentId);
-    if (index !== -1) {
-      db.assignments.splice(index, 1);
-      return { success: true };
-    }
-    return { success: false };
-  };
-
-  const updateAssignment = (assignmentId, updates) => {
-    const assignment = db.assignments.find((a) => a._id === assignmentId);
-    if (assignment) {
-      Object.assign(assignment, updates);
-      return { success: true };
-    }
-    return { success: false };
+    return { success: !!result, assignment: result };
   };
 
   return {

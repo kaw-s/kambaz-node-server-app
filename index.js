@@ -5,13 +5,16 @@ import PathParameters from "./Lab5/PathParameters.js";
 import db from "./Kambaz/Database/index.js";
 import UserRoutes from "./Kambaz/Users/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
+import ModulesRoutes from "./Kambaz/Modules/routes.js";
+import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 
 import cors from "cors";
 import "dotenv/config";
 import session from "express-session";
 import mongoose from "mongoose";
 
-const CONNECTION_STRING = process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
+const CONNECTION_STRING =
+  process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
 
 mongoose.connect(CONNECTION_STRING);
 const app = express();
@@ -26,12 +29,18 @@ const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false, // localhost is NOT https
+    sameSite: "none", // axios + localhost needs lax
+  },
 };
 if (process.env.SERVER_ENV !== "development") {
   sessionOptions.proxy = true;
   sessionOptions.cookie = {
+    httpOnly: true,
+    secure: true, // production requires https
     sameSite: "none",
-    secure: true,
     domain: process.env.SERVER_URL,
   };
 }
@@ -41,6 +50,9 @@ app.use(express.json());
 
 UserRoutes(app, db);
 CourseRoutes(app, db);
+ModulesRoutes(app, db)
+AssignmentRoutes(app);
+
 Lab5(app);
 Hello(app);
 PathParameters(app);
