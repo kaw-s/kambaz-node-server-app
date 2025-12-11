@@ -22,25 +22,19 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: [process.env.CLIENT_URL, "http://localhost:3000"],
   })
 );
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: false, // localhost is NOT https
-    sameSite: "none", // axios + localhost needs lax
-  },
 };
 if (process.env.SERVER_ENV !== "development") {
   sessionOptions.proxy = true;
   sessionOptions.cookie = {
-    httpOnly: true,
-    secure: true, // production requires https
     sameSite: "none",
+    secure: true,
     domain: process.env.SERVER_URL,
   };
 }
@@ -50,7 +44,7 @@ app.use(express.json());
 
 UserRoutes(app, db);
 CourseRoutes(app, db);
-ModulesRoutes(app, db)
+ModulesRoutes(app, db);
 AssignmentRoutes(app);
 
 Lab5(app);

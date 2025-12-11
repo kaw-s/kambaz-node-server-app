@@ -20,16 +20,22 @@ export default function CourseRoutes(app) {
       }
       userId = currentUser._id;
     }
-    const courses = await enrollmentsDao.findCoursesForUser(userId);
-
+    const courses = await dao.findCoursesForEnrolledUser(userId);
     res.json(courses);
   };
+
   const createCourse = async (req, res) => {
     const newCourse = await dao.createCourse(req.body);
     const currentUser = req.session["currentUser"];
-    enrollmentsDao.enrollUserInCourse(currentUser._id, newCourse._id);
+    if (!currentUser) {
+      res.sendStatus(401);
+      return;
+    }
+
+    await enrollmentsDao.enrollUserInCourse(currentUser._id, newCourse._id);
     res.json(newCourse);
   };
+
   const deleteCourse = async (req, res) => {
     const { courseId } = req.params;
     await enrollmentsDao.unenrollAllUsersFromCourse(courseId);
