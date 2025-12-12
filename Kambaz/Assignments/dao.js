@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+
 import AssignmentModel from "./model.js";
 
 export default function AssignmentsDao() {
@@ -9,8 +11,15 @@ export default function AssignmentsDao() {
     return await AssignmentModel.find({ course: courseId });
   };
 
+  // const createAssignment = async (assignment) => {
+  //   const newAssignment = new AssignmentModel(assignment);
+  //   return await newAssignment.save();
+  // };
   const createAssignment = async (assignment) => {
-    const newAssignment = new AssignmentModel(assignment);
+    const newAssignment = new AssignmentModel({
+      ...assignment,
+      _id: assignment._id || uuidv4(),
+    });
     return await newAssignment.save();
   };
 
